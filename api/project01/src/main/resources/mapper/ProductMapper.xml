@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tjetc.dao.ProductMapper">
+
+    <!--    产品表-->
+    <resultMap id="baseMap" type="product">
+        <id column="productid" property="productId"/>
+        <result column="productname" property="productName"/>
+        <result column="introduce" property="introduce"/>
+        <result column="yield" property="yield"/>
+    </resultMap>
+    <!--    列表-->
+    <select id="selectList" resultMap="baseMap">
+        select productid, `productname`, `introduce`, `yield`
+        from `product`
+    </select>
+    <!--    new-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="productId">
+        insert into `product`(`productname`, `introduce`, `yield`)
+        values (#{productName}, #{introduce}, #{yield})
+    </insert>
+    <!--    删除-->
+    <delete id="deleteById">
+        delete
+        from `product`
+        where productid = #{productId}
+    </delete>
+    <select id="selectByProductName" resultMap="baseMap">
+        select productid, `productname`, `introduce`, `yield`
+        from `product`
+        where `productname` = #{productName}
+    </select>
+    <!--    根据id查找-->
+    <select id="selectById" resultMap="baseMap">
+        select productid, `productname`, `introduce`, `yield`
+        from `product`
+        where `productid` = #{productId}
+    </select>
+    <update id="update">
+        update `product`
+        set `productname`=#{productName},
+            `introduce`=#{introduce},
+            `yield`=#{yield}
+        where productid = #{productId}
+    </update>
+</mapper>

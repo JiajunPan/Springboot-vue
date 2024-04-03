@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tjetc.dao.UserMapper">
+    <resultMap id="baseMap" type="user">
+        <id column="userid" property="userid"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="protectquestion" property="protectQuestion"/>
+        <result column="protectanswer" property="protectAnswer"/>
+        <result column="status" property="status"/>
+    </resultMap>
+    <!--    列表-->
+    <select id="selectList" resultMap="baseMap">
+        select userid, `username`, `password`, `protectquestion`, `protectanswer`, `status`
+        from `user`
+    </select>
+    <!--    new用户-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="userid">
+        insert into `user`(`username`, `password`, `protectquestion`, `protectanswer`, status)
+        values (#{username}, #{password}, #{protectQuestion}, #{protectAnswer}, 0)
+    </insert>
+    <!--    注销-->
+    <delete id="deleteById">
+        delete
+        from `user`
+        where userid = #{userid}
+    </delete>
+    <select id="selectByUsername" resultMap="baseMap">
+        select userid, `username`, `password`, `status`
+        from `user`
+        where `username` = #{username}
+    </select>
+    <!--    登录验证用-->
+    <select id="selectByUsernameAndPassword" resultMap="baseMap">
+        select userid, `username`, `password`, `status`
+        from `user`
+        where `username` = #{username}
+          and `password` = #{password}
+    </select>
+    <!--    根据id查找-->
+    <select id="selectById" resultMap="baseMap">
+        select userid, `username`, `password`
+        from `user`
+        where `userid` = #{userid}
+    </select>
+    <!--    密保验证-->
+    <select id="selectByUsernameAndProtect" resultMap="baseMap">
+        select userid, `username`, `password`, `status`
+        from `user`
+        where `username` = #{username}
+          and `protectquestion` = #{protectQuestion}
+          and `protectanswer` = #{protectAnswer}
+    </select>
+    <!--    改密码-->
+    <update id="update">
+        update `user`
+        set `password`=#{password},
+            protectquestion = #{protectQuestion},
+            protectanswer = #{protectAnswer}
+        where username = #{username}
+    </update>
+    <!--    改密保-->
+    <update id="updateProtectQuestion">
+        update `user`
+        set `protectquestion` = #{protectQuestion},
+            `protectanswer`   = #{protectAnswer}
+        where `username` = #{username}
+          and `password` = #{password}
+    </update>
+    <!--用户信息维护resultMap-->
+    <resultMap id="informationMap" type="user">
+        <id column="userid" property="userid"/>
+        <result column="name" property="name"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="birth" property="birth"/>
+        <result column="email" property="email"/>
+        <result column="address" property="address"/>
+        <result column="phone" property="phone"/>
+        <result column="balance" property="balance"/>
+    </resultMap>
+    <!--    余额维护balanceMap-->
+    <resultMap id="balanceMap" type="user">
+        <id column="userid" property="userid"/>
+        <result column="balance" property="balance"/>
+    </resultMap>
+    <!--    新建信息-->
+    <insert id="insertInformationById" keyProperty="id">
+        insert into `information`(`userid`, `name`, `sex`, `age`, `birth`, `email`, `address`, `phone`)
+        values (#{userid}, #{name}, #{sex}, #{age}, #{birth}, #{email}, #{address}, #{phone})
+    </insert>
+    <!--    删除信息-->
+    <delete id="deleteInformationById">
+        delete
+        from `information`
+        where userid = #{userid}
+    </delete>
+    <!--    更新信息-->
+    <update id="updateInformation">
+        update `information`
+        set `name`=#{name},
+            `sex`=#{sex},
+            `age`=#{age},
+            `birth`=#{birth},
+            `email`=#{email},
+            `address`=#{address},
+            `phone`=#{phone}
+        where userid = #{userid}
+    </update>
+    <!--    查询信息-->
+    <select id="selectInformationById" resultMap="informationMap">
+        select `userid`,
+               `name`,
+               `sex`,
+               `age`,
+               `birth`,
+               `email`,
+               `address`,
+               `phone`
+        from `information`
+        where `userid` = #{userid}
+    </select>
+    <!--    查询all信息-->
+    <select id="selectallInformation" resultMap="informationMap">
+        select `userid`,
+               `name`,
+               `sex`,
+               `age`,
+               `birth`,
+               `email`,
+               `address`,
+               `phone`
+        from `information`
+    </select>
+    <!--    查询all余额-->
+    <select id="selectallMoney" resultMap="balanceMap">
+        select `userid`, `balance`
+        from `balance`
+    </select>
+    <!--    new余额-->
+    <insert id="insertBalance" keyProperty="id">
+        insert into `balance`(`userid`, `balance`)
+        values (#{userid}, #{balance})
+    </insert>
+    <!--    删除余额-->
+    <delete id="deleteBalance">
+        delete
+        from `balance`
+        where `userid` = #{userid}
+    </delete>
+    <!--    改余额-->
+    <update id="updateBalance">
+        update `balance`
+        set `balance` = #{balance}
+        where `userid` = #{userid}
+    </update>
+    <!--    查余额-->
+    <select id="selectBalanceById" resultMap="balanceMap">
+        select `userid`, `balance`
+        from `balance`
+        where `userid` = #{userid}
+    </select>
+</mapper>

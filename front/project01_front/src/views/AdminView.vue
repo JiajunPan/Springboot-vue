@@ -1,0 +1,100 @@
+<!--主页面（推送页）-->
+<script setup>
+import {computed, ref} from 'vue'
+import {logout} from "@/api/user";
+import {ElMessage} from "element-plus";
+import router from "@/router";
+var cnt = 2;
+const isCollapse = ref(true)
+const method1 = () => {
+  if (cnt % 2 !== 0) {
+    cnt++;
+    isCollapse.value = true;
+  } else {
+    cnt++;
+    isCollapse.value = false;
+  }
+
+}
+const ExitClick=()=>{
+  logout().then((res)=>{
+    ElMessage.success(res.msg);
+    router.push({path: "/"})
+  })
+}
+</script>
+
+<template>
+  <div class="common-layout" style="width: 50px">
+    <el-affix :offset="50">
+      <el-menu
+          default-active="1"
+          class="el-menu-vertical-demo"
+          :collapse="isCollapse"
+          @open="handleOpen"
+          @close="handleClose"
+          style="height: 90vh;"
+          router="true"
+      >
+        <el-menu-item v-model="isCollapse" @click="method1" style="margin-bottom: 10px;">
+          <el-icon>
+            <Expand/>
+          </el-icon>
+          <template #title>展开</template>
+        </el-menu-item>
+        <el-menu-item index="1" style="margin-bottom: 10px;" route="/admin/home">
+          <el-icon>
+            <Avatar/>
+          </el-icon>
+          <span>管理员管理</span>
+        </el-menu-item>
+        <el-sub-menu index="2" style="margin-bottom: 10px;">
+          <template #title>
+            <el-icon>
+              <User/>
+            </el-icon>
+            <span>用户管理</span>
+          </template>
+          <el-menu-item-group title="账号信息管理">
+            <el-menu-item index="2-1" style="margin-bottom: 10px;" route="/admin/user/account">账号管理</el-menu-item>
+            <el-menu-item index="2-2" style="margin-bottom: 10px;" route="/admin/user/information">个人信息管理</el-menu-item>
+            <el-menu-item index="2-3" style="margin-bottom: 10px;" route="/admin/user/money">余额管理</el-menu-item>
+          </el-menu-item-group>
+          <el-menu-item-group title="购买管理">
+            <el-menu-item index="2-4" style="margin-bottom: 10px;" route="/admin/buy">购买信息管理</el-menu-item>
+          </el-menu-item-group>
+        </el-sub-menu>
+        <el-menu-item index="3" style="margin-bottom: 10px;" route="/admin/statistic">
+          <el-icon>
+            <DataLine/>
+          </el-icon>
+          <template #title>统计</template>
+        </el-menu-item>
+        <el-menu-item index="4" style="margin-bottom: 90px;" route="/admin/product">
+          <el-icon>
+            <Goods/>
+          </el-icon>
+          <template #title>产品管理</template>
+        </el-menu-item>
+        <el-menu-item index="6" style="bottom:1vh;top: 7vh" @click="ExitClick">
+          <el-icon>
+            <SwitchButton/>
+          </el-icon>
+          <template #title>退出</template>
+        </el-menu-item>
+      </el-menu>
+    </el-affix>
+  </div>
+  <div style="position:absolute;width: 85%;height: 90%;left:100px;right: 0; top: 80px;">
+    <router-view/>
+  </div>
+
+  <el-backtop :right="50" :bottom="50"/>
+</template>
+
+<style scoped>
+.el-menu-vertical-demo:not(.el-menu--collapse) {
+  width: 200px;
+  min-height: 400px;
+}
+</style>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tjetc.dao.AdminMapper">
+    <resultMap id="baseMap" type="admin">
+        <id column="adminid" property="adminId"/>
+        <result column="adminname" property="adminName"/>
+        <result column="password" property="password"/>
+    </resultMap>
+
+    <!--    管理员端用户管理功能-->
+    <!--    列表-->
+    <select id="selectList" resultMap="baseMap">
+        select adminid, `adminname`, `password`
+        from `admin`
+    </select>
+    <!--    new用户-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="adminId">
+        insert into `admin`(`adminname`, `password`)
+        values (#{adminName}, #{password})
+    </insert>
+    <!--    注销-->
+    <delete id="deleteById">
+        delete
+        from `admin`
+        where adminid = #{adminId}
+    </delete>
+    <!--    注册查重用-->
+    <select id="selectByAdmin" resultMap="baseMap">
+        select adminid, `adminname`, `password`
+        from `admin`
+        where `adminname` = #{adminName}
+    </select>
+    <!--    登录验证用-->
+    <select id="selectByAdminAndPassword" resultMap="baseMap">
+        select adminid, `adminname`, `password`
+        from `admin`
+        where `adminname` = #{adminName}
+          and `password` = #{password}
+    </select>
+    <!--    根据id查找-->
+    <select id="selectById" resultMap="baseMap">
+        select adminid, `adminname`, `password`
+        from `admin`
+        where `adminid` = #{adminId}
+    </select>
+    <!--    改密码-->
+    <update id="update">
+        update `admin`
+        set `password`=#{password}
+        where adminname = #{adminName}
+    </update>
+
+    <!--用户管理（无需身份及密保认证）-->
+    <!--    resultMap -->
+    <resultMap id="userMap" type="user">
+        <id column="userid" property="userid"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="protectquestion" property="protectQuestion"/>
+        <result column="protectanswer" property="protectAnswer"/>
+        <result column="status" property="status"/>
+    </resultMap>
+    <!--    列表-->
+    <select id="selectListUser" resultMap="userMap">
+        select userid, `username`, `status`
+        from `user`
+    </select>
+    <!--    new用户-->
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="userid">
+        insert into `user`(`username`, `password`, `protectquestion`, `protectanswer`, status)
+        values (#{username}, #{password}, #{protectQuestion}, #{protectAnswer}, 0)
+    </insert>
+    <!--    注销-->
+    <delete id="deleteByIdUser">
+        delete
+        from `user`
+        where userid = #{userid}
+    </delete>
+    <!--    根据用户名查找-->
+    <select id="selectByNameUser" resultMap="userMap">
+        select userid, `username`, `password`, `status`
+        from `user`
+        where `username` = #{username}
+    </select>
+    <!--    根据id查找-->
+    <select id="selectByIdUser" resultMap="userMap">
+        select userid, `username`, `password`
+        from `user`
+        where `userid` = #{userid}
+    </select>
+    <!--    改密码-->
+    <update id="updateUser">
+        update `user`
+        set `password`=#{password},
+            `protectquestion` = #{protectQuestion},
+            `protectanswer` = #{protectAnswer}
+        where `userid` = #{userid}
+    </update>
+    <!--    改密保-->
+    <update id="updateProtectQuestionUser">
+        update `user`
+        set `protectquestion` = #{protectQuestion},
+            `protectanswer`   = #{protectAnswer}
+        where `userid` = #{userid}
+    </update>
+    <!--    权限控制（状态码update）-->
+    <update id="updateStateCode">
+        update `user`
+        set `status`=#{status}
+        where `userid` = #{userid}
+    </update>
+
+    <!--用户信息详情页-->
+    <resultMap id="informationMap" type="user">
+        <id column="userid" property="userid"/>
+        <result column="name" property="name"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="birth" property="birth"/>
+        <result column="email" property="email"/>
+        <result column="address" property="address"/>
+        <result column="phone" property="phone"/>
+        <result column="balance" property="balance"/>
+    </resultMap>
+    <!--    查询信息-->
+    <select id="selectInformationById" resultMap="informationMap">
+        select `name`, `sex`, `age`, `birth`, `email`, `address`, `phone`
+        from `information`
+        where `userid` = #{userid}
+    </select>
+    <!--    改余额-->
+    <update id="updateBalance">
+        update `balance`
+        set `balance`=#{balance}
+        where `userid` = #{userid}
+    </update>
+    <!--    查余额-->
+    <select id="selectBalanceById" resultMap="informationMap">
+        select `userid`, `balance`
+        from `balance`
+        where `userid` = #{userid}
+    </select>
+
+
+</mapper>

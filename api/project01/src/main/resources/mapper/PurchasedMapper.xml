@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tjetc.dao.PurchasedMapper">
+
+    <!--    购买记录表-->
+    <resultMap id="buyMap" type="purchased">
+        <id column="userid" property="userid"/>
+        <id column="productid" property="productId"/>
+        <result column="productname" property="productName"/>
+        <result column="username" property="username"/>
+        <result column="buydate" property="buyDate"/>
+        <result column="purchaseamount" property="money"/>
+        <result column="yield" property="yield"/>
+    </resultMap>
+
+    <!--    增-->
+    <insert id="insert">
+        insert into `buy`(`userid`, `productid`, `buydate`, `purchaseamount`, `yield`)
+        values (#{userid}, #{productId}, #{buyDate}, #{money}, #{yield})
+    </insert>
+
+    <!--    删-->
+    <!--    userid-->
+    <delete id="deleteByUser">
+        delete
+        from `buy`
+        where userid = #{userid}
+    </delete>
+    <!--    productid-->
+    <delete id="deleteByProduct">
+        delete
+        from `buy`
+        where productid = #{productId}
+    </delete>
+    <delete id="delete">
+        delete
+        from `buy`
+        where productid = #{productId}
+          and userid = #{userid}
+          and buydate = #{buyDate}
+          and purchaseamount = #{money}
+    </delete>
+    <!--    改-->
+    <update id="updateByUser">
+        update `buy`
+        set purchaseamount=#{money}
+        where userid = #{userid}
+    </update>
+
+
+    <!--    查-->
+
+    <!--    按列表-->
+    <select id="selectallBuy" resultMap="buyMap">
+        select buy.userid, `productname`, buy.productid, `buydate`, `purchaseamount`, buy.yield
+        from `buy`
+                 inner join product
+                            on buy.productid = product.productid
+    </select>
+    <!--    按用户id-->
+    <select id="selectBuyByUser" resultMap="buyMap">
+        select buy.userid, `productname`, buy.productid, `buydate`, `purchaseamount`, buy.yield
+        from `buy`
+                 inner join product
+                            on buy.productid = product.productid
+        where buy.userid = #{userid}
+    </select>
+    <!--    按id（计算用）-->
+    <!--    按产品-->
+    <select id="selectBuyByProduct" resultMap="buyMap">
+        select buy.userid, `username`, `productid`, `buydate`, `purchaseamount`, `yield`
+        from `buy`
+                 inner join user
+                            on buy.userid = user.userid
+        where `productid` = #{productId}
+    </select>
+    <!--    按时间-->
+    <select id="selectBuyByDate" resultMap="buyMap">
+        select buy.userid, `username`, `productid`, `buydate`, `purchaseamount`, `yield`
+        from `buy`
+                 inner join user
+                            on buy.userid = user.userid
+        where `buydate` between #{date1} and #{date2}
+    </select>
+
+    <resultMap id="buyResultMap" type="Stat">
+        <id column="userid" property="userid"/>
+        <id column="productid" property="productId"/>
+        <result column="productname" property="productName"/>
+        <result column="sumMoney" property="sumMoney"/>
+        <result column="countuser" property="cnt"/>
+        <result column="countproduct" property="cnt"/>
+    </resultMap>
+
+    <!--    返回个数（计数）-->
+    <!--    用户买了多少产品-->
+    <select id="countBuyByUser" resultMap="buyResultMap">
+        select `userid`, count(userid) as `countuser`
+        from `buy`
+        group by `userid`
+    </select>
+    <select id="countUserBuy" resultMap="buyResultMap">
+        select count(userid) as `countuser`
+        from `buy`
+        where `userid` = #{userid}
+    </select>
+    <!--产品被多少用户买-->
+    <select id="countBuyByProduct" resultMap="buyResultMap">
+        select buy.productid, productname, count(buy.productid) as `countproduct`
+        from `buy`
+                 inner join projectdb.product p on buy.productid = p.productid
+        group by `productid`
+    </select>
+
+    <!--    返回总数（加和）-->
+    <!--用户买了多少钱-->
+    <select id="sumBuyByUser" resultMap="buyResultMap">
+        select sum(purchaseamount) as sumMoney
+        from `buy`
+        where `userid` = #{userid}
+    </select>
+    <select id="sumBuyAllUser" resultMap="buyResultMap">
+        select `userid`, sum(purchaseamount) as sumMoney
+        from `buy`
+        group by `userid`
+    </select>
+    <!--产品卖了多少钱-->
+    <select id="sumBuyByProduct" resultMap="buyResultMap">
+        select sum(purchaseamount) as sumMoney
+        from `buy`
+        where `productid` = #{productId}
+    </select>
+    <select id="sumBuyAll" resultMap="buyResultMap">
+        select buy.productid, productname, sum(purchaseamount) as sumMoney
+        from `buy`
+                 inner join projectdb.product p on buy.productid = p.productid
+        group by buy.productid
+    </select>
+    <!--    max，min-->
+    <!--买的最多的用户-->
+    <select id="maxUser" resultMap="buyResultMap">
+        SELECT userid, SUM(purchaseamount) AS sumMoney
+        FROM `buy`
+        GROUP BY `userid`
+        HAVING sumMoney =
+               (SELECT MAX(sum_value) as max_sum
+                FROM (SELECT SUM(purchaseamount) AS sum_value
+                      FROM `buy`
+                      GROUP BY `userid`) as temp)
+    </select>
+    <!--    卖得最多的产品-->
+    <select id="maxProduct" resultMap="buyResultMap">
+        SELECT productid, SUM(purchaseamount) AS sumMoney
+        FROM `buy`
+        GROUP BY `productid`
+        HAVING sumMoney =
+               (SELECT MAX(sum_value) as max_sum
+                FROM (SELECT SUM(purchaseamount) AS sum_value
+                      FROM `buy`
+                      GROUP BY `productid`) as temp)
+    </select>
+    <!--    卖的最少的产品-->
+    <select id="minProduct" resultMap="buyResultMap">
+        SELECT productid, SUM(purchaseamount) AS sumMoney
+        FROM `buy`
+        GROUP BY `productid`
+        HAVING sumMoney =
+               (SELECT min(sum_value) as max_sum
+                FROM (SELECT SUM(purchaseamount) AS sum_value
+                      FROM `buy`
+                      GROUP BY `productid`) as temp)
+    </select>
+</mapper>
