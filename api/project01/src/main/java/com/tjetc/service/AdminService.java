@@ -8,34 +8,37 @@ import com.tjetc.entity.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 管理员相关操作的服务接口。
+ */
 public interface AdminService {
-    //    全部
+    //全部
     List<Admin> findAll();
 
     //id查找
     Admin findById(Long id);
 
-    //    注册
+    //注册
     JsonResult save(Admin admin);
 
-    //    注销
+    //注销
     boolean deleteById(Long id);
 
-    //    改
+    //改
     int update(Admin admin);
 
 
     //用户
-    //    全部用户
+    //全部用户
     List<User> findAllUser();
 
     //id查找
     User findByIdUser(Long id);
 
-    //    注销
+    //注销
     boolean deleteByIdUser(Long id);
 
-    //    改
+    //改
     boolean updateUser(User user);
 
     boolean updateProtectQuestionUser(User user);

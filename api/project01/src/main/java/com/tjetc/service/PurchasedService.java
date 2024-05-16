@@ -7,6 +7,9 @@ import com.tjetc.entity.Stat;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * 购买记录相关操作的服务接口。
+ */
 public interface PurchasedService {
     List<Purchased> findBuyByUser(Long userid);
 
@@ -29,13 +32,19 @@ public interface PurchasedService {
     List<Stat> countProduct();
 
     double sumUser(Long userid);
+
     int countUserBuy(Long userid);
 
     double sumProduct(Long productId);
+
     List<Stat> sumUserAll();
+
     List<Stat> sumProductAll();
+
     Stat incomeUser(Long userid);
+
     Stat expectIncomeUser(Long userid);
+
     Stat maxBuyUser();
 
     Stat maxBuyProduct();

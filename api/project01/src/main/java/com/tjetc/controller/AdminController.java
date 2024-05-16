@@ -1,6 +1,9 @@
 package com.tjetc.controller;
 
 
+import com.tjetc.common.CheckPrivilege;
+import com.tjetc.common.CreateDeleteJsonResult;
+import com.tjetc.common.CreateUpdateJsonResult;
 import com.tjetc.common.JsonResult;
 import com.tjetc.entity.Admin;
 import com.tjetc.entity.Purchased;
@@ -16,6 +19,9 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
 
+/**
+ * 管理员控制器，处理管理员相关的请求。
+ */
 @RestController
 @RequestMapping("admin")
 public class AdminController {
@@ -23,74 +29,86 @@ public class AdminController {
     private AdminService adminService;
     @Autowired
     private UserService userService;
-    //登陆信息类维护
-    //所有列表
+
+    /**
+     * 获取所有管理员列表。
+     *
+     * @param session HttpSession对象。
+     * @return 所有管理员的JsonResult对象。
+     */
     @RequestMapping("all")
     public JsonResult all(HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
+        CheckPrivilege.checkPrivilege(session);
         List<Admin> admins = adminService.findAll();
         return new JsonResult(0, "", admins);
     }
 
-    //id查询接口
+    /**
+     * 根据管理员ID获取管理员信息。
+     *
+     * @param id 管理员ID。
+     * @return 管理员信息的JsonResult对象。
+     */
     @RequestMapping("byId/{id}")
     public JsonResult byId(@PathVariable("id") Long id) {
         Admin admin = adminService.findById(id);
         return new JsonResult(0, "", admin);
     }
 
-    //新增
+    /**
+     * 新增管理员。
+     *
+     * @param admin   管理员对象。
+     * @param session HttpSession对象。
+     * @return 新增操作的结果的JsonResult对象。
+     */
     @RequestMapping("save")
-    public JsonResult save(Admin admin ,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
+    public JsonResult save(Admin admin, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
         if (admin.getAdminName() == null || "".equals(admin.getAdminName().trim())) {
             return new JsonResult(1, "用户名不能为空", null);
         } else if (admin.getPassword() == null || "".equals(admin.getPassword().trim())) {
             return new JsonResult(1, "密码不能为空", null);
         } else return adminService.save(admin);
     }
-    @ExceptionHandler({IndexOutOfBoundsException.class,NullPointerException.class})
+
+    /**
+     * 处理IndexOutOfBoundsException和NullPointerException异常。
+     *
+     * @param e 异常对象。
+     * @return 处理异常后的JsonResult对象。
+     */
+    @ExceptionHandler({IndexOutOfBoundsException.class, NullPointerException.class})
     public JsonResult handlerException1(Exception e) {
         e.printStackTrace();
         return new JsonResult<>(1, "记录为空", null);
     }
-    //删除
+
+    /**
+     * 删除管理员。
+     *
+     * @param id      管理员ID。
+     * @param session HttpSession对象。
+     * @return 删除操作的结果的JsonResult对象。
+     */
     @RequestMapping("delete/{id}")
     public JsonResult delete(@PathVariable("id") Long id, HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
-        boolean bl = adminService.deleteById(id);
-        JsonResult result;
-        if (bl) {
-            result = new JsonResult<>(0, "", null);
-        } else {
-            result = new JsonResult<>(1, "删除失败", null);
-        }
-        return result;
+        CheckPrivilege.checkPrivilege(session);
+        boolean flag = adminService.deleteById(id);
+        return CreateDeleteJsonResult.createDeleteJsonResult(flag);
+
     }
 
+    /**
+     * 重置管理员密码。
+     *
+     * @param admin   管理员对象。
+     * @param session HttpSession对象。
+     * @return 修改密码操作的结果的JsonResult对象。
+     */
     @RequestMapping("resetPassword")
-    public JsonResult resetPassword(Admin admin ,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
+    public JsonResult resetPassword(Admin admin, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
         if ((admin.getAdminName() == null || "".equals(admin.getAdminName().trim()))) {
             return new JsonResult(1, "用户名不能为空", null);
         }
@@ -98,59 +116,61 @@ public class AdminController {
         return new JsonResult(0, "修改成功", null);
     }
 
+    /**
+     * 获取所有用户列表。
+     *
+     * @param session HttpSession对象。
+     * @return 所有用户的JsonResult对象。
+     */
     @RequestMapping("allUser")
     public JsonResult allUser(HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
+        CheckPrivilege.checkPrivilege(session);
         List<User> users = adminService.findAllUser();
         return new JsonResult(0, "", users);
     }
 
+    /**
+     * 根据用户ID获取用户信息。
+     *
+     * @param id      用户ID。
+     * @param session HttpSession对象。
+     * @return 用户信息的JsonResult对象。
+     */
     @RequestMapping("userById/{id}")
-    public JsonResult userById(@PathVariable("id") Long id,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
+    public JsonResult userById(@PathVariable("id") Long id, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
         User user = adminService.findByIdUser(id);
         return new JsonResult(0, "", user);
     }
 
+    /**
+     * 删除用户。
+     *
+     * @param id      用户ID。
+     * @param session HttpSession对象。
+     * @return 删除操作的结果的JsonResult对象。
+     */
     @RequestMapping("deleteUser/{id}")
-    public JsonResult deleteUser(@PathVariable("id") Long id,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
-        boolean bl = adminService.deleteByIdUser(id);
-        JsonResult result;
-        if (bl) {
-            result = new JsonResult<>(0, "", null);
-        } else {
-            result = new JsonResult<>(1, "删除失败", null);
-        }
-        return result;
+    public JsonResult deleteUser(@PathVariable("id") Long id, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
+        boolean flag = adminService.deleteByIdUser(id);
+        return CreateDeleteJsonResult.createDeleteJsonResult(flag);
+
     }
-//    改保护
+
+    /**
+     * 修改用户保护状态。
+     *
+     * @param user    用户对象。
+     * @param session HttpSession对象。
+     * @return 修改操作的结果的JsonResult对象。
+     */
     @RequestMapping("changeUserProtect")
-    public JsonResult changeUserProtect(User user,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
-        boolean bl = adminService.updateUser(user);
+    public JsonResult changeUserProtect(User user, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
+        boolean flag = adminService.updateUser(user);
         JsonResult result;
-        if (bl) {
+        if (flag) {
             result = new JsonResult<>(0, "更改保护成功", null);
         } else {
             result = new JsonResult<>(1, "更改保护失败", null);
@@ -158,55 +178,65 @@ public class AdminController {
         return result;
     }
 
+    /**
+     * 修改用户状态。
+     *
+     * @param user    用户对象。
+     * @param session HttpSession对象。
+     * @return 修改操作的结果的JsonResult对象。
+     */
     @RequestMapping("changeUserState")
-    public JsonResult changeUserState(User user,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
-        boolean bl = adminService.updateStateCode(user);
-        JsonResult result;
-        if (bl) {
-            result = new JsonResult<>(0, "更改状态成功", null);
-        } else {
-            result = new JsonResult<>(1, "更改状态失败", null);
-        }
-        return result;
+    public JsonResult changeUserState(User user, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
+        boolean flag = adminService.updateStateCode(user);
+        return CreateDeleteJsonResult.createDeleteJsonResult(flag);
+
     }
 
+    /**
+     * 根据用户ID获取用户信息。
+     *
+     * @param id      用户ID。
+     * @param session HttpSession对象。
+     * @return 用户信息的JsonResult对象。
+     */
     @RequestMapping("userInformation")
-    public JsonResult UserInformation(Long id,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
+    public JsonResult UserInformation(Long id, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
         User user = adminService.findInformationById(id);
         return new JsonResult(0, "", user);
     }
 
+    /**
+     * 修改用户余额。
+     *
+     * @param user    用户对象。
+     * @param session HttpSession对象。
+     * @return 修改操作的结果的JsonResult对象。
+     */
     @RequestMapping("changeBalance")
-    public JsonResult changeBalance(User user,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
-        boolean bl = adminService.updateBalance(user);
-        JsonResult result;
-        if (bl) {
-            result = new JsonResult<>(0, "更新成功", null);
-        } else {
-            result = new JsonResult<>(1, "更新失败", null);
-        }
-        return result;
+    public JsonResult changeBalance(User user, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
+        boolean flag = adminService.updateBalance(user);
+        return CreateUpdateJsonResult.createUpdateJsonResult(flag);
     }
+
+    /**
+     * 修改用户信息。
+     *
+     * @param userid  用户ID。
+     * @param session HttpSession对象。
+     * @param name    用户姓名。
+     * @param sex     用户性别。
+     * @param age     用户年龄。
+     * @param birth   用户出生日期。
+     * @param email   用户邮箱。
+     * @param address 用户地址。
+     * @param phone   用户电话。
+     * @return 修改操作的结果的JsonResult对象。
+     */
     @RequestMapping("changeUserInformation")
-    public JsonResult changeUserInformation(Long userid,HttpSession session,
+    public JsonResult changeUserInformation(Long userid, HttpSession session,
                                             @RequestParam(value = "name", required = false, defaultValue = "未填写") String name,
                                             @RequestParam(value = "sex", required = false, defaultValue = "未填写") String sex,
                                             @RequestParam(value = "age", required = false, defaultValue = "0") int age,
@@ -214,13 +244,8 @@ public class AdminController {
                                             @RequestParam(value = "email", required = false, defaultValue = "未填写") String email,
                                             @RequestParam(value = "address", required = false, defaultValue = "未填写") String address,
                                             @RequestParam(value = "phone", required = false, defaultValue = "未填写") String phone) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
-        UserInformation(userid,session);
+        CheckPrivilege.checkPrivilege(session);
+        UserInformation(userid, session);
         User user = new User();
         user.setUserid(userid);
         user.setName(name);
@@ -236,86 +261,114 @@ public class AdminController {
         user.setEmail(email);
         user.setAddress(address);
         user.setPhone(phone);
-        boolean bl = userService.updateInformation(user);
-        if (bl) {
-            return new JsonResult(0, "更新成功", bl);
-        } else {
-            return new JsonResult(1, "更新失败", bl);
-        }
+        boolean flag = userService.updateInformation(user);
+        return CreateUpdateJsonResult.createUpdateJsonResult(flag);
     }
+
+    /**
+     * 根据用户ID获取用户余额。
+     *
+     * @param id      用户ID。
+     * @param session HttpSession对象。
+     * @return 用户余额的JsonResult对象。
+     */
     @RequestMapping("balance/{id}")
-    public JsonResult findBalance(@PathVariable("id") Long id ,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
+    public JsonResult findBalance(@PathVariable("id") Long id, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
         User user = adminService.findBalanceById(id);
         return new JsonResult(0, "", user);
     }
 
+    /**
+     * 根据用户ID获取用户购买记录。
+     *
+     * @param id      用户ID。
+     * @param session HttpSession对象。
+     * @return 用户购买记录的JsonResult对象。
+     */
     @RequestMapping("purchaseUser/{id}")
-    public JsonResult purchaseUser(@PathVariable("id") Long id,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
+    public JsonResult purchaseUser(@PathVariable("id") Long id, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
         List<Purchased> purchaseds = adminService.findBuyByUser(id);
         return new JsonResult(0, "", purchaseds);
     }
 
+    /**
+     * 根据产品ID获取产品购买记录。
+     *
+     * @param id      产品ID。
+     * @param session HttpSession对象。
+     * @return 产品购买记录的JsonResult对象。
+     */
     @RequestMapping("purchaseProduct/{id}")
-    public JsonResult purchaseProduct(@PathVariable("id") Long id ,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
+    public JsonResult purchaseProduct(@PathVariable("id") Long id, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
         List<Purchased> purchaseds = adminService.findBuyByProduct(id);
         return new JsonResult(0, "", purchaseds);
     }
 
+    /**
+     * 根据购买日期范围获取购买记录。
+     *
+     * @param dateTime1 开始日期。
+     * @param dateTime2 结束日期。
+     * @param session   HttpSession对象。
+     * @return 购买记录的JsonResult对象。
+     */
     @RequestMapping("purchaseDate")
-    public JsonResult purchaseDate(LocalDateTime dateTime1, LocalDateTime dateTime2,HttpSession session) {
-        if (session == null || session.getAttribute("admin") == null) {
-            return new JsonResult(-1, "未登录或登录过期，请重新登录", null);
-        }
-        if (session != null && session.getAttribute("user") != null) {
-            return new JsonResult(-1, "用户禁止操作", null);
-        }
+    public JsonResult purchaseDate(LocalDateTime dateTime1, LocalDateTime dateTime2, HttpSession session) {
+        CheckPrivilege.checkPrivilege(session);
         List<Purchased> purchaseds = adminService.findBuyByDate(dateTime1, dateTime2);
         return new JsonResult(0, "", purchaseds);
     }
 
+    /**
+     * 管理员登录。
+     *
+     * @param adminName 管理员用户名。
+     * @param password  管理员密码。
+     * @param session   HttpSession对象。
+     * @return 登录操作的结果的JsonResult对象。
+     */
     @RequestMapping("login")
     public JsonResult login(String adminName, String password, HttpSession session) {
         if ((adminName == null || "".equals(adminName.trim())) || (password == null || "".equals(password.trim()))) {
             return new JsonResult(0, "用户名与密码不能为空", null);
         }
-//        查询用户
+        //查询用户
         JsonResult result = adminService.login(adminName, password);
         if (result.getStatus() == 0) {
-//      登录成功，往session对象存储登录的标记
-//            springboot自动给我们传session
+        //登录成功，往session对象存储登录的标记
             Admin admin = (Admin) result.getData();
-//            在session对象中存储admin对象，key为admin字符串，value是admin对象
+        //在session对象中存储admin对象，key为admin字符串，value是admin对象
             session.setAttribute("admin", admin);
         }
         return result;
     }
+
+    /**
+     * 管理员登出。
+     *
+     * @param session HttpSession对象。
+     * @return 登出操作的结果的JsonResult对象。
+     */
     @RequestMapping("logout")
     public JsonResult logout(HttpSession session) {
         session.invalidate();
-        return new JsonResult<>(0, "登出成功",null);
+        return new JsonResult<>(0, "登出成功", null);
     }
-    //异常处理类
+
+    /**
+     * 异常处理类，处理ArithmeticException异常。
+     *
+     * @param e 异常对象。
+     * @return 处理异常后的JsonResult对象。
+     */
     @ExceptionHandler({ArithmeticException.class})
     public JsonResult handlerException(Exception e) {
         e.printStackTrace();
         return new JsonResult<>(2, "出错，请联系管理员", null);
     }
+
+
 }
