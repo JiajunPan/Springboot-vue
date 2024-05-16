@@ -26,4 +26,5 @@ const user = {
     },
     actions: {}
 }
+//导出这个模块，使得其他组件可以引入并使用这个模块来管理用户信息的状态
 export default user

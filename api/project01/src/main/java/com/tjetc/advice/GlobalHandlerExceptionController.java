@@ -4,13 +4,18 @@ import com.tjetc.common.JsonResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-//局部异常处理（对指定相同的异常）局部优先级高，全局优先级低，可以把特有处理逻辑放在局部异常处理 公共处理逻辑放到全局异常处理
-//全局处理异常 对所有的controller的制定异常都会捕获与处理
-//@ControllerAdvice+@ResponseBody
+/**
+ * 全局异常处理类，用于处理所有Controller抛出的异常。
+ */
 @RestControllerAdvice
 public class GlobalHandlerExceptionController {
-    //    处理异常上 使用Exception 这样包含常用的所有异常情况
-//    @ExceptionHandler({ArithmeticException.class, NullPointerException.class, Exception.class})
+
+    /**
+     * 处理所有异常，包括Exception及其子类的异常。
+     *
+     * @param e 异常对象
+     * @return JsonResult对象，表示异常信息
+     */
     @ExceptionHandler({Exception.class})
     public JsonResult handlerAtiException(Exception e) {
         System.out.println("全局异常处理");

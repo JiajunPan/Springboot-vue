@@ -3,9 +3,7 @@ package com.tjetc.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.tjetc.common.JsonResult;
-import com.tjetc.dao.AdminMapper;
 import com.tjetc.dao.UserMapper;
-import com.tjetc.entity.Admin;
 import com.tjetc.entity.User;
 import com.tjetc.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +18,6 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private AdminMapper adminMapper;
 
     @Override
     public List<User> findAll() {
@@ -41,10 +37,6 @@ public class UserServiceImpl implements UserService {
         if (users.size() > 0) {
             return new JsonResult(1, "用户名重复，请换个用户名", null);
         }
-        List<Admin> admins = adminMapper.selectByAdmin(user.getUsername());
-        if (admins.size() > 0) {
-            return new JsonResult(1, "用户名重复，请换个用户名", null);
-        }
         userMapper.insert(user);
         user.setBalance(0);
         userMapper.insertBalance(user);
@@ -52,9 +44,9 @@ public class UserServiceImpl implements UserService {
         user.setSex("未填写");
         LocalDate localDate = LocalDate.parse("2000-01-01");
         LocalDate localDate1 = LocalDate.now();
-//        计算时间差值
+        //计算时间差值
         Period period = Period.between(localDate, localDate1);
-//        自动计算并写入年龄
+        //自动计算并写入年龄
         user.setAge(period.getYears());
         user.setBirth(localDate);
         user.setEmail("未填写");
@@ -93,11 +85,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public JsonResult login(String username, String password) {
         List<User> users = userMapper.selectByUsernameAndPassword(username, password);
+        if (users.size() == 0) {
+            return new JsonResult(1, "用户名或密码错误", null);
+        }
         if (users.size() > 1) {
             return new JsonResult(1, "用户名重复，查询到多个用户，请联系管理员", null);
-        }
-        if (users.size() <= 0) {
-            return new JsonResult(1, "用户名或密码错误", null);
         }
         if (users.get(0).getStatus() != 0) {
             if (users.get(0).getStatus() == 1) {
@@ -113,13 +105,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public JsonResult findUserByUsernameAndProtect(String username, String protectQuestion, String protectAnswer) {
         List<User> users = userMapper.selectByUsernameAndProtect(username, protectQuestion, protectAnswer);
+        if (users.size() == 0) {
+            return new JsonResult(1, "用户名或密保错误", null);
+        }
         if (users.size() > 1) {
             throw new RuntimeException("用户名重复，查询到多个用户，请联系管理员");
         }
-        if (users.size() <= 0) {
-            return new JsonResult(1, "用户名或密保错误", null);
-        }
         return new JsonResult(0, "成功", users.get(0));
+    }
+
+    @Override
+    public User findByName(User user) {
+        System.out.println(userMapper.selectByUsername(user.getUsername()).get(0));
+        return userMapper.selectByUsername(user.getUsername()).get(0);
     }
 
     @Override

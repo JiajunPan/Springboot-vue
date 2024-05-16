@@ -1,13 +1,17 @@
 <script setup>
-import {ElButton, ElDrawer, ElMessage} from 'element-plus'
+import { ElButton, ElDrawer, ElMessage, ElMessageBox } from 'element-plus';
 import {onMounted, reactive, ref} from 'vue'
 import {useStore} from "vuex";
 import {changeInformation, seeInformation, update} from "@/api/user";
 import {CircleCloseFilled} from "@element-plus/icons-vue";
+import axios from 'axios'; // 导入axios
+import { useRouter } from 'vue-router';
 
 const store = useStore()
 const visible = ref(false)
 const visible1 = ref(false)
+const router = useRouter();
+
 const userinformationChange=reactive({
   userid: '',
   username: '',
@@ -16,7 +20,8 @@ const userinformationChange=reactive({
   birth: '',
   email: '',
   address: '',
-  phone: ''
+  phone: '',
+  address: []
 })
 const userUpdate=reactive({
   username: '',
@@ -36,16 +41,162 @@ const userinformation = reactive({
       phone: ''
     }
 )
+const provinces = [
+  {
+    value: '北京市',
+    label: '北京市',
+  },
+  {
+    value: '天津市',
+    label: '天津市',
+  },
+  {
+    value: '河北省',
+    label: '河北省',
+  },
+  {
+    value: '山西省',
+    label: '山西省',
+  },
+  {
+    value: '内蒙古自治区',
+    label: '内蒙古自治区',
+  },
+  {
+    value: '辽宁省',
+    label: '辽宁省',
+  },
+  {
+    value: '吉林省',
+    label: '吉林省',
+  },
+  {
+    value: '黑龙江省',
+    label: '黑龙江省',
+  },
+  {
+    value: '上海市',
+    label: '上海市',
+  },
+  {
+    value: '江苏省',
+    label: '江苏省',
+  },
+  {
+    value: '浙江省',
+    label: '浙江省',
+  },
+  {
+    value: '安徽省',
+    label: '安徽省',
+  },
+  {
+    value: '福建省',
+    label: '福建省',
+  },
+  {
+    value: '江西省',
+    label: '江西省',
+  },
+  {
+    value: '山东省',
+    label: '山东省',
+  },
+  {
+    value: '河南省',
+    label: '河南省',
+  },
+  {
+    value: '湖北省',
+    label: '湖北省',
+  },
+  {
+    value: '湖南省',
+    label: '湖南省',
+  },
+  {
+    value: '广东省',
+    label: '广东省',
+  },
+  {
+    value: '广西壮族自治区',
+    label: '广西壮族自治区',
+  },
+  {
+    value: '海南省',
+    label: '海南省',
+  },
+  {
+    value: '重庆市',
+    label: '重庆市',
+  },
+  {
+    value: '四川省',
+    label: '四川省',
+  },
+  {
+    value: '贵州省',
+    label: '贵州省',
+  },
+  {
+    value: '云南省',
+    label: '云南省',
+  },
+  {
+    value: '西藏自治区',
+    label: '西藏自治区',
+  },
+  {
+    value: '陕西省',
+    label: '陕西省',
+  },
+  {
+    value: '甘肃省',
+    label: '甘肃省',
+  },
+  {
+    value: '青海省',
+    label: '青海省',
+  },
+  {
+    value: '宁夏回族自治区',
+    label: '宁夏回族自治区',
+  },
+  {
+    value: '新疆维吾尔自治区',
+    label: '新疆维吾尔自治区',
+  },
+  {
+    value: '台湾省',
+    label: '台湾省',
+  },
+  {
+    value: '香港特别行政区',
+    label: '香港特别行政区',
+  },
+  {
+    value: '澳门特别行政区',
+    label: '澳门特别行政区',
+  },
+];
+
 const ruleFormRef = ref()
 const rulesForm = reactive({
-  name: [{required: true, message: '姓名不能为空', trigger: 'blur'},
-    {min: 2, max: 10, message: '姓名长度2~10个字符', trigger: 'blur'},
+  name: [{ required: true, message: '姓名不能为空', trigger: 'blur' },
+    { min: 2, max: 10, message: '姓名长度2~10个字符', trigger: 'blur' },
   ],
-  sex: [{required: true, message: '性别不能为空', trigger: 'blur'},
+  sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
+  birth: [{ required: true, message: '生日不能为空', trigger: 'blur' }],
+  email: [
+    { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+    { type: 'email', message: '邮箱格式不正确', trigger: ['blur', 'change'] }
   ],
-  date: [{required: true, message: '生日不能为空', trigger: 'blur'},
+  phone: [
+    { required: true, message: '请输入手机号码', trigger: 'blur' },
+    { pattern: /^[1][3,4,5,7,8][0-9]{9}$/, message: '手机号格式不正确', trigger: ['blur', 'change'] }
   ],
-})
+});
+
 const onSubmit = () => {
   ruleFormRef.value.validate((valid) => {
     if (valid) {
@@ -91,6 +242,38 @@ const updateUser=()=>{
   userUpdate.username=store.getters.getUsername;
   visible1.value=true;
 }
+const deleteAccount = (id) => {
+  return new Promise((resolve, reject) => {
+    axios.delete(`/api/user/delete/${id}`)
+      .then((response) => {
+        resolve(response.data); // 如果删除成功，传递成功的数据
+      })
+      .catch((error) => {
+        reject(error); // 如果删除失败，传递失败的原因
+      });
+  });
+};
+const deleteUser = (id) => {
+  ElMessageBox.confirm('确定要注销账号吗?（账户资金将一起注销，并且无法找回）', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    deleteAccount(id)
+      .then(() => {
+        // 处理删除成功的逻辑
+        ElMessage.success('账号注销成功');
+        router.push({ path: "/" })
+      })
+      .catch(() => {
+        // 处理删除失败的逻辑
+        ElMessage.error('账号注销失败');
+      });
+  }).catch(() => {
+    // 用户取消删除的操作
+    ElMessage.info('已取消注销账号');
+  });
+};
 onMounted(() => {
   seeInformation(store.getters.getId).then((res) => {
     console.log(res.data);
@@ -143,14 +326,17 @@ onMounted(() => {
     </el-descriptions-item>
   </el-descriptions>
   <el-button @click="changeUser" type="primary" round size="large">
-    修改个人信息
+    完善个人信息
   </el-button>
   <el-button @click="updateUser" type="primary" round size="large">
     修改保护
   </el-button>
+  <el-button @click="deleteUser(userinformation.userid)" type="danger" round size="large">
+    注销账号
+  </el-button>
   <el-drawer v-model="visible" :show-close="false">
     <template #header="{ close, titleId, titleClass }">
-      <h4 :id="titleId" :class="titleClass">修改个人信息</h4>
+      <h4 :id="titleId" :class="titleClass">完善个人信息</h4>
       <el-button type="danger" @click="close">
         <el-icon class="el-icon--left">
           <CircleCloseFilled/>
@@ -158,38 +344,49 @@ onMounted(() => {
         关闭
       </el-button>
     </template>
-    <el-form :model="userinformationChange" ref="ruleFormRef" :rules="rulesForm" label-width="120px">
-      <el-form-item label="姓名">
-        <el-input v-model="userinformationChange.name"/>
-      </el-form-item>
-      <el-form-item label="性别">
-        <el-input v-model="userinformationChange.sex"/>
-      </el-form-item>
-      <el-form-item label="生日">
-        <el-col :span="11">
-          <el-date-picker
-              v-model="userinformationChange.birth"
-              type="date"
-              placeholder="选择一个日期"
-              format="YYYY-MM-DD"
-              value-format="YYYY-MM-DD"
-              style="width: 100%"
-          />
-        </el-col>
-      </el-form-item>
-      <el-form-item label="E-Mail">
-        <el-input v-model="userinformationChange.email"/>
-      </el-form-item>
-      <el-form-item label="手机号">
-        <el-input v-model="userinformationChange.phone"/>
-      </el-form-item>
-      <el-form-item label="地址">
-        <el-input v-model="userinformationChange.address"/>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="onSubmit">确认</el-button>
-      </el-form-item>
-    </el-form>
+    <el-form :model="userinformationChange" :rules="rulesForm" ref="ruleFormRef" label-width="120px">
+  <el-form-item label="姓名" prop="name">
+    <el-input v-model="userinformationChange.name"/>
+  </el-form-item>
+  <el-form-item label="性别" prop="sex">
+  <el-radio-group v-model="userinformationChange.sex">
+    <el-radio label="男">男</el-radio>
+    <el-radio label="女">女</el-radio>
+  </el-radio-group>
+</el-form-item>
+
+  <el-form-item label="生日" prop="birth">
+    <el-col :span="11">
+      <el-date-picker
+          v-model="userinformationChange.birth"
+          type="date"
+          placeholder="选择一个日期"
+          format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
+          style="width: 100%"
+      />
+    </el-col>
+  </el-form-item>
+  <el-form-item label="E-Mail" prop="email">
+    <el-input v-model="userinformationChange.email"/>
+  </el-form-item>
+  <el-form-item label="手机号" prop="phone">
+    <el-input v-model="userinformationChange.phone"/>
+  </el-form-item>
+  <el-form-item label="地址" prop="address">
+  <el-cascader
+    v-model="userinformationChange.address"
+    :options="provinces"
+    placeholder="请选择省份"
+    clearable
+  ></el-cascader>
+  </el-form-item>
+
+  <el-form-item>
+    <el-button type="primary" @click="onSubmit">确认</el-button>
+  </el-form-item>
+</el-form>
+
   </el-drawer>
   <el-drawer v-model="visible1" :show-close="false">
     <template #header="{ close, titleId, titleClass }">
