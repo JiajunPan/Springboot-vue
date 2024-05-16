@@ -143,6 +143,7 @@ const toadmin = () => {
 
 <template>
   <section>
+    <div class="logo">理财管理系统</div>
     <div class="box">
       <div class="square" style="--i:0;"></div>
       <div class="square" style="--i:1;"></div>
@@ -236,7 +237,7 @@ const toadmin = () => {
                 <el-input v-model="userFormRegister.protectQuestion"/>
               </el-form-item>
               <br>
-              <el-form-item label="答案" prop="protectAnswer">
+              <el-form-item label="密保答案" prop="protectAnswer">
                 <el-input v-model="userFormRegister.protectAnswer"/>
               </el-form-item>
               <br>
@@ -315,6 +316,13 @@ section {
   background: rgba(223, 241, 255, 0.99);
 }
 
+.logo {
+  position: fixed;
+  top: 20px;
+  right: 50%;
+  font-size: 24px;
+  color: #333; /* 设置颜色 */
+}
 
 .box {
   position: relative;

@@ -36,7 +36,7 @@ logout().then((res)=>{
           @close="handleClose"
           style="height: 90vh;"
           router="true"
-      >
+        >
         <el-menu-item v-model="isCollapse" @click="method1" style="margin-bottom: 40px;">
           <el-icon>
             <Expand/>
@@ -67,7 +67,7 @@ logout().then((res)=>{
           </el-icon>
           <template #title>已购买&余额</template>
         </el-menu-item>
-        <el-menu-item index="5" style=";bottom:1vh;top: 5vh;" route="/main/user">
+        <el-menu-item index="5" style="bottom:1vh;top: 5vh;" route="/main/user">
           <el-icon>
             <User/>
           </el-icon>

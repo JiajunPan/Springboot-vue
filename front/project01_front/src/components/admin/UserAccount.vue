@@ -11,6 +11,7 @@ const visible = ref(false)
 const visible1 = ref(false)
 const visible2 = ref(false)
 const search = ref('')
+
 const stateData = reactive(
   {
     userid: "",
@@ -113,8 +114,8 @@ delUser(deleteData.userid).then((res) => {
 
   <div style="font-size: 28px; margin-top: 20px;margin-bottom: 30px">你可以在这里管理用户账户</div>
 
-  <el-table :data="userData.filter(data => !search||data.username.toLowerCase().includes(search.toLowerCase()))"
-            style="width: 1500px;margin-top: 40px;font-size:medium" :row-style="{height: '80px'}">
+  <el-table :data="userData.filter(data => !search||data.username.toLowerCase().includes(search.toLowerCase()))" style="width: 1500px;margin-top: 40px;font-size:medium" :row-style="{height: '80px'}">
+
     <el-table-column prop="userid" label="用户id" width="95" sortable/>
     <el-table-column prop="username" label="用户名" width="150" sortable/>
     <el-table-column prop="password" label="密码" width="200"/>

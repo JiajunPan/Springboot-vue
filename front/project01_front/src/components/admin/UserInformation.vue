@@ -69,7 +69,7 @@ const onSubmit=()=>{
 
   <div style="font-size: 28px; margin-top: 20px;margin-bottom: 30px">你可以在这里管理用户个人信息</div>
 
-  <el-table :data="userData.filter(data => !search||data.name.toLowerCase().includes(search.toLowerCase()))" style="width: 1500px;margin-top: 40px;font-size:medium" :row-style="{height: '80px'}">
+  <el-table :data="userData.filter(data => !search||data.username.toLowerCase().includes(search.toLowerCase()))" style="width: 1500px;margin-top: 40px;font-size:medium" :row-style="{height: '80px'}">
     <el-table-column prop="userid" label="用户id" width="75" sortable/>
     <el-table-column prop="name" label="姓名" width="120" sortable/>
     <el-table-column prop="sex" label="性别" width="60" sortable/>

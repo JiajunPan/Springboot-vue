@@ -40,27 +40,14 @@ const service = axios.create({
 
 // response 拦截器
 service.interceptors.response.use(
-    /**
-     * If you want to get http information such as headers or status
-     * Please return  response => response
-     */
-
-    /**
-     * Determine the request status by custom code
-     * Here is just an example
-     * You can also judge the status by HTTP Status Code
-     */
     response => {
         const res = response.data
-
-        // if the custom code is not 20000, it is judged as an error.
         if (res.status > 0) {
             console.log(res.msg)
             ElMessage.error(res.msg || "系统出错");
             return new Promise(() => {
             });//此时的promise链停下来了
         } else if (res.status === -1) { // 未登录或者登录过期
-            // to re-login
             ElMessageBox.alert('登录已经过期，请重新登录', '登录过期', {
                 confirmButtonText: '重新登录',
                 callback: () => {
@@ -77,7 +64,7 @@ service.interceptors.response.use(
         }
     },
     error => {
-        console.log('err' + error) // for debug
+        console.log('err' + error) 
         ElMessage.error(error.msg)
         //此时的promise链停下来了
         return new Promise(() => {
